@@ -1,50 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Photo Gallery</title>
-    <link rel="stylesheet" href ="styles.css">
-</head>
-<body>
-    <h1> Welcome! </h1>
-    <form>
-        <fieldset>
-            <legend>Upload New Picture</legend>
-            <p>
-                <label>Photo Name</label>
-                <input type = "text"
-                       id = "photoName" />
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
-            </p>
-            <p>
-                <label>Date taken</label>
-                <input type = "text"
-                       id = "dateTaken" />
+    <title>Assignment 1</title>
+  </head>
+  <body>
+    <div class="jumbotron text-center">
+      <h1>Simple Photo Gallery</h1>
+      <p>Upload your Photo</p>
+    </div>
 
+    <div class="container" style="margin-top: 25px; max-width: 480px;">
+      <h3>Add Photo to Gallery</h3>
+      <form action="gallery.php" method="post" enctype="multipart/form-data">
+        <div class="form-group" style="padding: 10px;">
+          <label for="photoName">Photo name:</label>
+          <input type="text" class="form-control" name="photoName" id="photoName">
+        </div>
+        <div class="form-group" style="padding: 10px;">
+          <label for="photoDate">Date Taken:</label>
+          <input type="date" class="form-control" name="dateTaken" id="dateTaken">
+        </div>
+        <div class="form-group" style="padding: 10px;">
+          <label for="photographer">Photographer:</label>
+          <input type="text" class="form-control" name="photographer" id="photographer">
+        </div>
+        <div class="form-group" style="padding: 10px;">
+          <label for="location">Location:</label>
+          <input type="text" class="form-control" name="locationOfPhoto" id="locationOfPhoto">
+        </div>
+        <div class="form-group" style="padding: 10px;">
+          <label for="fileToUpload">Select a file:</label>
+          <input type="file" class="form-control" name="uploadImage" id="uploadImage">
+        </div>
+        <div class="form-group text-center" style="padding: 6px;">
+        <button type="submit" class="btn btn-primary" name="submitBtn">Submit</button>
+        <a class="btn btn-primary" href="./gallery.php" role="button">Check the Gallery</a>
+        </div>
+      </form>            
+    </div>
 
-            </p>
-            <p>
-                <label>Photographer</label>
-                <input type = "text"
-                       id = "Photographer" />
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 
-
-            </p>
-            <p>
-                <label>Location</label>
-                <input type = "text"
-                       id = "location" />
-
-
-            </p>
-
-            <form action="/action_page.php">
-                <input type="file" id="myFile" name="filename">
-                <input type="submit">
-            </form>
-
-        </fieldset>
-    </form>
-</body>
+  </body>
 </html>
