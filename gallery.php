@@ -60,7 +60,7 @@
         function UploadData($photoName, $dateTaken, $photographer, $locationOfPhoto, $uploadImage, $date) {
           $uploadString = $date."\t".$photoName."\t".$dateTaken."\t".$photographer."\t".$locationOfPhoto."\t".$uploadImage."\n";
       
-          @$fp = fopen("./gallery.txt", 'ab');
+          @$fp = fopen("/home/titan0/cs431s/cs431s41/homepage/Assignment1/gallery.txt", 'ab');
         
           if (!$fp) {
           echo "<p><strong> Problem: Could not move file to destination directory
@@ -122,7 +122,7 @@
       <div class="row" style="padding-top: 25px;">
         <?php
         // scan "uploads" folder and display files
-        $directory = "./uploads";
+        $directory = "/home/titan0/cs431s/cs431s41/homepage/Assignment1/uploads";
         $results = scandir('./uploads');
 
         foreach ($results as $result) {
