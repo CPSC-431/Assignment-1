@@ -1,151 +1,179 @@
+<!DOCTYPE html>
 <?php
-  $photoName = $_POST['photoName'];
-  $dateTaken = $_POST['dateTaken'];
-  $photographer = $_POST['photographer'];
-  $locationOfPhoto = preg_replace('/\t|\R/',' ',$_POST['locationOfPhoto']);
-  $uploadImage = $_FILES['uploadImage']['name'];
-  $date = date('H:i, jS F Y');
+// Checks if input is valid
+if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
+    // variables
+    $file = $_FILES['fileToUpload'];
+    $fileName = $_FILES['fileToUpload']['name'];
+    $fileTmpName = $_FILES['fileToUpload']['tmp_name'];
+    $fileError = $_FILES['fileToUpload']['error'];
+    $fileType = $_FILES['fileToUpload']['type'];// Gets the ext of file
+    $document_root = $_SERVER['DOCUMENT_ROOT'];
+
+    if($fileError > 0){ //if there is a error then display error sign
+        echo 'Problem: '.$fileError;
+        exit;
+    } 
+    
+    // this checks if the file extension is correct
+    if($fileType != 'image/jpeg' && $fileType != 'image/png'){
+        echo 'Problem: file is not a PNG image or a JPEG: ';
+        exit;
+    } 
+     $uploaded_file = 'uploads/'.$fileName;
+
+     if(is_uploaded_file($fileTmpName)){
+         if(!move_uploaded_file($fileTmpName,$uploaded_file)){
+             echo 'Problem: Could not move file to destination directory';
+             exit;
+         }
+    }
+    else {
+        echo 'Problem: Possible file upload attack. Filename: '. $fileName;
+        exit;
+    }
+    ?>
+
+    <?php
+	//Save meta data and name of image file to a text document
+    $fp = fopen("gallery.txt", 'ab');
+    
+    if(!$fp){ // if fopen fails exit
+        echo '<p><strong> Your order could not be processed at this time. 
+        .Please try again later.</strong></p></body></html>';
+        exit;
+    }
+    
+    // all input is trimed and uppercase
+	$getPhotoName = strtoupper(trim($_POST['photoName'])); // input variables 
+	$getDateTaken = trim($_POST['dateTaken']); // use _POST because its safer
+    $getPhotoGrapher = strtoupper(trim($_POST['photographer']));
+    $getLocation = strtoupper(trim($_POST['location']));
+
+    $outputString = $fileName."\t".$getPhotoName."\t".// string to append
+    $getDateTaken."\t".$getPhotoGrapher."\t".$getLocation."\n";
+	
+	
+	file_put_contents("gallery.txt", $outputString, FILE_APPEND); // append data here
+	//Use rewind() to move the pointer to the start of the file
+    rewind($fp);
+    fclose($fp);
+    ?>
+	
+<?php
+    // Read file and add data to array and show pictures.
+    $fp = fopen("gallery.txt", 'rb');
+
+    if(!$fp){
+        echo 'error reading file!';
+        exit;
+    }
+
+    $bigarray = [];
+
+    while(!feof($fp)){
+        $lines = fgets($fp); // gets the whole line
+        if($lines === false) break; // deletes empty line at the end
+        $line = explode("\t",$lines); // explodes the lines into separate varaibles
+        $tmparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // pushing to an array
+        array_push($bigarray,$tmparray);
+    }
+
+    fclose($fp); // close file
+}
+
 ?>
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <title>Assignment 1</title>
-  </head>
-  <body>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+    <title>The Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <h1>View All Photos</h1>   
+    </header>
+	<!-- Create a form to perform the same thing as index.php and leave it blank-->
+<form action = "gallery.php" method="post" enctype="multipart/form-data">
+    <table> 
+        <tr> 
+            <td> 
+            <div class="form-group">
+                <h2>Sort By:
+                <select id="sortby" class="form-control" name="sort">
+                    <option value="name">Name</option>
+                    <option value="date">Date</option>
+                    <option value="photographer">Photographer</option>
+                    <option value="location">Location</option>
+                </select>
+                <button type="submit" name="ok">Ok</button>
+                </h2>
+            </div>
+            </td>
+	        <form action = "gallery.php" method = "post" enctype = "multipart/form-data">
+            <td> 
+            <!--<input type="button" value="Add another Picture" onClick="javascript:history.go(-1)" />-->
+		    <!-- Go back to the uploads page if the user presses the add another picture button-->
+		    <button type="submit" formaction="$document_root/../index.html"> Add Another Picture</button>
+	        </td>
+	        </form>
+        </tr>
+    </table>
+</form>
     <div>
-      <h1>Simple Photo Gallery</h1>
-      <p>Upload your Photo</p>
-    </div>
-
-    <div class="container" style="margin-top: 25px;">
-      <h3>View the Gallery</h3>
-      <div class="d-flex flex-row">
-        <div style="padding-right: 10px;">
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-              Sort By
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item">Name</a></li>
-              <li><a class="dropdown-item">Date action</a></li>
-              <li><a class="dropdown-item">Photographer</a></li>
-              <li><a class="dropdown-item">Location</a></li>
-            </ul>
-          </div>
-        </div>
-        <div style="padding-left: 10px;">
-          <form action="./index.html" method="post" enctype="multipart/form-data">
-            <button type="submit" class="btn btn-primary">Upload New Photo</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="container">
-      <?php
-        if(isset($_POST['submitBtn'])) { 
-          UploadData($photoName, $dateTaken, $photographer, $locationOfPhoto, $uploadImage, $date);
-          UploadPhoto();
-        }
-        
-        function UploadData($photoName, $dateTaken, $photographer, $locationOfPhoto, $uploadImage, $date) {
-          $uploadString = $date."\t".$photoName."\t".$dateTaken."\t".$photographer."\t".$locationOfPhoto."\t".$uploadImage."\n";
-      
-          @$fp = fopen("/home/titan0/cs431s/cs431s41/homepage/Assignment1/gallery.txt", 'ab');
-        
-          if (!$fp) {
-          echo "<p><strong> Problem: Could not move file to destination directory
-          Please try again later.</strong></p>";
-          exit;
-          }
-        
-          flock($fp, LOCK_EX);
-          fwrite($fp, $uploadString, strlen($uploadString));
-          flock($fp, LOCK_UN);
-          fclose($fp);
-        }
-
-        function UploadPhoto() {
-          $target_dir = "uploads/";
-          $target_file = $target_dir . basename($_FILES["uploadImage"]["name"]);
-          $upload = 1;
-          $fileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-        
-          // Check if image file is a actual image or fake image
-          if(isset($_POST["submit"])) {
-            $check = getimagesize($_FILES["uploadImage"]["tmp_name"]);
-            if($check !== false) {
-              echo "File is an image - " . $check["mime"] . ".";
-              $upload = 1;
-            } else {
-              echo "This file is not an image";
-              $upload = 0;
-            }
-          }
-        
-          // Determines if the photo already exists
-          if (photo_exists($target_file)) {
-            echo "Sorry, file already exists.<br>";
-            $upload = 0;
-          }
-                
-          // Checks if the file extensions are correct
-          if($fileType != "jpg" && $fileType != "png" && $fileType != "jpeg") {
-            echo "Problem: file is not a PNG, JPEG, or JPG:<br>";
-            $upload = 0;
-          }
-        
-          // Check if $upload is set to 0 by an error
-          if ($upload == 0) {
-            echo "Your image was not uploaded correctly";
-          } else {
-            if (move_uploaded_file($_FILES["uploadImage"]["tmp_name"], $target_file)) {
-              echo "Your image ". htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])). " has been uploaded correctly.";
-            } else {
-              echo "Error in uploading your image.<br>";
-            }
-          }
-        }
-      ?>
-    </div>
-
-    <div class="container">
-      <div class="row" style="padding-top: 25px;">
         <?php
-        // scan "uploads" folder and display files
-        $directory = "/home/titan0/cs431s/cs431s41/homepage/Assignment1/uploads";
-        $results = scandir('./uploads');
+        $answer='name';
+//If the user has pressed the ok button for sort....
+if (isset($_POST["ok"])) {
+//...have gallery.txt be read into $bigarray since the form has refreshed...
+	 $fp = fopen("gallery.txt", 'rb');
 
-        foreach ($results as $result) {
-          if ($result === '.' or $result === '..') {
-            continue;
-          }
-          if (is_file($directory . '/' . $result)) {
-            echo '
-            <div class="col-md-3" style="padding-bottom: 25px; padding-top: 25px;">
-              <div class="thumbnail">
-                <img src="'.$directory . '/' . $result.'" alt="..." style="width:100%">
-                  <!-- <div class="caption">
-                    <p>'.$photoName.'<br>'.$dateTaken.'<br>'.$photographer.'<br>'.$locationOfPhoto.'</p>
-                  </div> -->
-              </div>
-            </div>';
-          }
-        }
-        ?>
-      </div>
-    </div>
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    if(!$fp){
+        echo 'error reading file';
+    }
+	
+    $answer = $_POST["sort"];
+    $bigarray = [];
 
-  </body>
+    while(!feof($fp)){
+        $lines = fgets($fp); // gets the whole line
+        if($lines === false) break; // deletes empty line at the end
+        $line = explode("\t",$lines); // explodes the lines into separate varaibles
+        $tmparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // pushing to an array
+        array_push($bigarray,$tmparray);
+    }
+    fclose($fp); // close file
+}
+
+// ...And sort the array according to which "sort" method the user selected in the dropdown
+if($answer === 'name'){
+    array_multisort( array_column( $bigarray, 1),SORT_ASC,  $bigarray);
+} else if($answer === 'date'){
+    array_multisort( array_column( $bigarray, 2),SORT_ASC, SORT_NUMERIC, $bigarray);
+} else if($answer === 'photographer'){
+    array_multisort( array_column( $bigarray, 3),SORT_ASC, $bigarray);
+} else if($answer === 'location'){
+    array_multisort( array_column( $bigarray, 4),SORT_ASC, $bigarray);
+}
+
+//Display the gallery by using a for loop and echo data-boxes to the screen
+$len = count($bigarray); // gets bigarray length
+for($row = 0; $row < $len; $row++){
+    echo '<div class="list-content">'; // fileName 
+    echo'<img class="picture-content" src="uploads/'.$bigarray[$row][0].'"/ alt="Error on Displaying"></img>';
+    echo'<div class="data-box">'.$bigarray[$row][1].'</div>'; // name
+    echo'<div class="data-box">'.$bigarray[$row][2].'</div>'; // date
+    echo'<div class="data-box">'.$bigarray[$row][3].'</div>'; // photographer
+    echo'<div class="data-box">'.$bigarray[$row][4].'</div>'; // location
+    echo'</div>';
+}
+?>
+</div>
+</main>
+</body>
 </html>
