@@ -8,7 +8,7 @@
 - http://ecs.fullerton.edu/~cs431s41/Assignment1/
 
 ## Contribution's:
-- Emiliano - wrote the code for the user interface, minor troubleshooting. 
+- Emiliano - wrote the code for the user interface, minor troubleshooting, wrote index.html, styled with bootstrap.
 - Sagar - prototyped the design and wrote the php code for uploading the photo, saving the information into a text file, and arranging the order of the photos using the sorting method.
 
 ## gallery.php code
