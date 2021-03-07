@@ -2,13 +2,13 @@
 
 ## Team members:
 - Sagar Joshi | CWID: 805532256
-- Emiliano Arranaga | CWID:
+- Emiliano Arranaga | CWID: 888006756
 
 ## Project URL(s):
 - http://ecs.fullerton.edu/~cs431s41/Assignment1/
 
 ## Contribution's:
-- Emiliano - 
+- Emiliano - wrote the code for the user interface, minor troubleshooting. 
 - Sagar - prototyped the design and wrote the php code for uploading the photo, saving the information into a text file, and arranging the order of the photos using the sorting method.
 
 ## gallery.php code
