@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <?php
-// Checks if input is valid
-if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
-    // variables
+// this determines if the variable were declared once you submit
+if(isset($_POST["submit"])) {     
     $file = $_FILES['fileToUpload'];
     $fileName = $_FILES['fileToUpload']['name'];
     $fileTmpName = $_FILES['fileToUpload']['tmp_name'];
     $fileError = $_FILES['fileToUpload']['error'];
-    $fileType = $_FILES['fileToUpload']['type'];// Gets the ext of file
+    $fileType = $_FILES['fileToUpload']['type']; // Obtain the extension of the file/image
     $document_root = $_SERVER['DOCUMENT_ROOT'];
 
-    if($fileError > 0){ //if there is a error then display error sign
+    // Error
+    if($fileError > 0){ 
         echo 'Problem: '.$fileError;
         exit;
     } 
     
-    // this checks if the file extension is correct
-    if($fileType != 'image/jpeg' && $fileType != 'image/png'){
-        echo 'Problem: file is not a PNG image or a JPEG: ';
+    // Checks if the file extension is correct
+    if($fileType != 'image/jpeg' && $fileType != 'image/png' && $fileType != 'image/gif' && $fileType != 'image/jpg'){
+        echo 'Problem: file is not a PNG, JPEG, GIF, or JPG: ';
         exit;
     } 
      $uploaded_file = 'uploads/'.$fileName;
@@ -35,27 +35,26 @@ if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
     ?>
 
     <?php
-	//Save meta data and name of image file to a text document
+    //Save meta data and name of image file to gallery.txt
     $fp = fopen("gallery.txt", 'ab');
     
     if(!$fp){ // if fopen fails exit
-        echo '<p><strong> Your order could not be processed at this time. 
+        echo '<p><strong> Your order could not be processed. 
         .Please try again later.</strong></p></body></html>';
         exit;
     }
     
-    // all input is trimed and uppercase
-	$getPhotoName = strtoupper(trim($_POST['photoName'])); // input variables 
-	$getDateTaken = trim($_POST['dateTaken']); // use _POST because its safer
-    $getPhotoGrapher = strtoupper(trim($_POST['photographer']));
+    // inputs trimed and uppercase
+    $getPhotoName = strtoupper(trim($_POST['photoName']));  
+    $getDateTaken = trim($_POST['dateTaken']); 
+    $getPhotographer = strtoupper(trim($_POST['photographer']));
     $getLocation = strtoupper(trim($_POST['location']));
 
-    $outputString = $fileName."\t".$getPhotoName."\t".// string to append
-    $getDateTaken."\t".$getPhotoGrapher."\t".$getLocation."\n";
+    $outputString = $fileName."\t".$getPhotoName."\t".$getDateTaken."\t".$getPhotographer."\t".$getLocation."\n";
 	
 	
-	file_put_contents("gallery.txt", $outputString, FILE_APPEND); // append data here
-	//Use rewind() to move the pointer to the start of the file
+    file_put_contents("gallery.txt", $outputString, FILE_APPEND); // append data
+    //May be unncessary, but used rewind() to move the pointer to the start of the file
     rewind($fp);
     fclose($fp);
     ?>
@@ -69,14 +68,16 @@ if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
         exit;
     }
 
-    $bigarray = [];
+    $galleryarray = [];  //empty array to store information from index.html
 
     while(!feof($fp)){
-        $lines = fgets($fp); // gets the whole line
-        if($lines === false) break; // deletes empty line at the end
-        $line = explode("\t",$lines); // explodes the lines into separate varaibles
-        $tmparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // pushing to an array
-        array_push($bigarray,$tmparray);
+        $lines = fgets($fp); 
+        if($lines === false) {
+             break; // removes empty lines
+        }
+        $line = explode("\t",$lines); // explodes new line into the array, creating separate variables
+        $temparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // push -> array
+        array_push($galleryarray,$temparray);
     }
 
     fclose($fp); // close file
@@ -86,7 +87,7 @@ if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
 
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
     <title>The Gallery</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -96,83 +97,91 @@ if(isset($_POST["submit"])) { //if a variable is declared when submit is pressed
 </head>
 <body>
     <header>
-        <h1>View All Photos</h1>   
+        <h1 class="display-5">View All Photos</h1>   
     </header>
-	<!-- Create a form to perform the same thing as index.php and leave it blank-->
+    <br>
+
 <form action = "gallery.php" method="post" enctype="multipart/form-data">
     <table> 
         <tr> 
             <td> 
             <div class="form-group">
-                <h2>Sort By:
+                <h2 class="display-5">Sort By:</h2>
                 <select id="sortby" class="form-control" name="sort">
                     <option value="name">Name</option>
                     <option value="date">Date</option>
                     <option value="photographer">Photographer</option>
                     <option value="location">Location</option>
                 </select>
-                <button type="submit" name="ok">Ok</button>
-                </h2>
+                <!-- slight problem: images don't appear immediately until you press "OK" -->
+                <button type="submit" name="ok">Ok</button>                 
             </div>
-            </td>
-	        <form action = "gallery.php" method = "post" enctype = "multipart/form-data">
-            <td> 
-            <!--<input type="button" value="Add another Picture" onClick="javascript:history.go(-1)" />-->
-		    <!-- Go back to the uploads page if the user presses the add another picture button-->
-		    <button type="submit" formaction="$document_root/../index.html"> Add Another Picture</button>
-	        </td>
-	        </form>
+            <form action = "gallery.php" method = "post" enctype = "multipart/form-data">
+                <td> 
+                   <button type="submit" style="position:absolute; right:0" formaction="$document_root/../index.html"> Add Another Picture</button>
+                </td>
+            </form>
         </tr>
     </table>
 </form>
-    <div>
+    <div class="row">
         <?php
-        $answer='name';
-//If the user has pressed the ok button for sort....
+        $input='name';
+
 if (isset($_POST["ok"])) {
-//...have gallery.txt be read into $bigarray since the form has refreshed...
-	 $fp = fopen("gallery.txt", 'rb');
+
+//Here I have gallery.txt be read into $galleryarray as the form gets refreshed...
+$fp = fopen("gallery.txt", 'rb');
 
     if(!$fp){
-        echo 'error reading file';
+        echo 'Error: Unable to reading file';
     }
 	
-    $answer = $_POST["sort"];
-    $bigarray = [];
+    $input = $_POST["sort"];
+    $galleryarray = [];
 
     while(!feof($fp)){
-        $lines = fgets($fp); // gets the whole line
-        if($lines === false) break; // deletes empty line at the end
-        $line = explode("\t",$lines); // explodes the lines into separate varaibles
-        $tmparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // pushing to an array
-        array_push($bigarray,$tmparray);
+        $lines = fgets($fp); 
+        if($lines === false) {
+             break; // removes empty lines
+        }
+        $line = explode("\t",$lines); // explodes new line into the array, creating separate variables
+        $temparray = [$line[0],$line[1],$line[2],$line[3],$line[4]]; // push -> array
+        array_push($galleryarray,$temparray);
     }
-    fclose($fp); // close file
+    fclose($fp); 
 }
 
-// ...And sort the array according to which "sort" method the user selected in the dropdown
-if($answer === 'name'){
-    array_multisort( array_column( $bigarray, 1),SORT_ASC,  $bigarray);
-} else if($answer === 'date'){
-    array_multisort( array_column( $bigarray, 2),SORT_ASC, SORT_NUMERIC, $bigarray);
-} else if($answer === 'photographer'){
-    array_multisort( array_column( $bigarray, 3),SORT_ASC, $bigarray);
-} else if($answer === 'location'){
-    array_multisort( array_column( $bigarray, 4),SORT_ASC, $bigarray);
+// Sort the array according to which "sort" method the user selected in the dropdown
+if($input === 'name'){
+    array_multisort( array_column( $galleryarray, 1),SORT_ASC,  $galleryarray);
+} else if($input === 'date'){
+    array_multisort( array_column( $galleryarray, 2),SORT_ASC, SORT_NUMERIC, $galleryarray);
+} else if($input === 'photographer'){
+    array_multisort( array_column( $galleryarray, 3),SORT_ASC, $galleryarray);
+} else if($input === 'location'){
+    array_multisort( array_column( $galleryarray, 4),SORT_ASC, $galleryarray);
 }
 
-//Display the gallery by using a for loop and echo data-boxes to the screen
-$len = count($bigarray); // gets bigarray length
-for($row = 0; $row < $len; $row++){
-    echo '<div class="list-content">'; // fileName 
-    echo'<img class="picture-content" src="uploads/'.$bigarray[$row][0].'"/ alt="Error on Displaying"></img>';
-    echo'<div class="data-box">'.$bigarray[$row][1].'</div>'; // name
-    echo'<div class="data-box">'.$bigarray[$row][2].'</div>'; // date
-    echo'<div class="data-box">'.$bigarray[$row][3].'</div>'; // photographer
-    echo'<div class="data-box">'.$bigarray[$row][4].'</div>'; // location
+// Using a for loop and echo data-boxes to display the images on screen in a card format, from bootstrap
+$len = count($galleryarray); // 
+for($row = 0; $row < $len; $row++) {
+echo '<div class ="col-12 col-md-4 mb-5">';
+    echo '<div class="card-deck">';
+       echo '<div class="card" style="width: 18rem;">';
+         echo '<div class="list-content">'; // coming from fileName
+         echo '<div class="card-body">'; 
+           echo'<img class="picture-content card-img-top" src="uploads/'.$galleryarray[$row][0].'"/ alt="Card img cap" style="width:100%;object-fit:cover;"></img>';
+             echo'<p class="data-box card-text">Name: '.$galleryarray[$row][1].'</p>'; // name
+             echo'<p class="data-box card-text">Date: '.$galleryarray[$row][2].'</p>'; // date
+             echo'<p class="data-box card-text">Photographer: '.$galleryarray[$row][3].'</p>'; // photographer
+             echo'<p class="data-box card-text">Location: '.$galleryarray[$row][4].'</p>'; // location
+           echo'</div>';
+         echo'</div>';
+         echo'</div>';
+       echo'</div>';
     echo'</div>';
-}
-?>
+}?>
 </div>
 </main>
 </body>
