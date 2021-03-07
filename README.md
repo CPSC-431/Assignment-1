@@ -5,4 +5,4 @@
 - Emiliano Arranaga | CWID:
 
 ## Project URL(s):
-- ecs.fullerton.edu/~cs431s41/Assignment1
+- http://ecs.fullerton.edu/~cs431s41/Assignment1/
